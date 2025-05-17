@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 import Courses from "./pages/student/Courses";
 import MyLearning from "./pages/student/MyLearning";
+import Profile from "./pages/student/Profile";
 const appRouter = createBrowserRouter([
   {
     path: "/",
@@ -18,17 +19,21 @@ const appRouter = createBrowserRouter([
           <>
             <HeroSection />
             {/* courses */}
-            <Courses/>
+            <Courses />
           </>
         ),
       },
       {
-        path:"login",
-        element:<Login/>
+        path: "login",
+        element: <Login />,
       },
-        {
-        path:"my-learning",
-        element:<MyLearning/>
+      {
+        path: "my-learning",
+        element: <MyLearning />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },
@@ -37,7 +42,7 @@ const App = () => {
   return (
     // <div>App</div>
     <main>
-      <RouterProvider router={appRouter}/>
+      <RouterProvider router={appRouter} />
     </main>
   );
 };

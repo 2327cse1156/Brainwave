@@ -55,7 +55,7 @@ const Navbar = () => {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem><Link to={"my-learning"}>My Learning</Link></DropdownMenuItem>
-                <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                <DropdownMenuItem><Link to={"profile"}>Edit Profile</Link></DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Log out</DropdownMenuItem>

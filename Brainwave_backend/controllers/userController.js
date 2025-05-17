@@ -140,3 +140,31 @@ export const login = async (req, res) => {
     });
   }
 };
+
+// Logout Controller
+export const logout = async (req, res) => {
+  try {
+    return res.status(200).cookie("token", "",{maxAge:0}.json({
+      message:"Logged Out Successfully",
+      success:true
+    }))
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success:false,
+      message:"Failed to logout"
+    })
+  }
+};
+
+export const getUserProfile = async (req,res) => {
+  try {
+    isA
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success:false,
+      message:"Failed to load user"
+    })
+  }
+}
