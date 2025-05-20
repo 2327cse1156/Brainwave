@@ -1,12 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn } from "../authSlice";
 const USER_API = "http://localhost:8080/api/v1/user/";
+
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
     baseUrl: USER_API,
     credentials: "include",
   }),
+  tagTypes:["User"],
   endpoints: (builder) => ({
     registerUser: builder.mutation({
       query: (inputData) => ({
@@ -14,6 +16,14 @@ export const authApi = createApi({
         method: "POST",
         body: inputData,
       }),
+      async onQueryStarted(_, {queryFulfilled,dispatch}) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(userLoggedIn({user:result.data.user}))
+        } catch (error) {
+          console.log(error)
+        }
+      }
     }),
     loginUser: builder.mutation({
       query: (inputData) => ({
@@ -30,7 +40,43 @@ export const authApi = createApi({
         }
       },
     }),
+    logoutUser:builder.mutation({
+      query: () => ({
+        url:"logout",
+        method: "GET",
+    })
+    }),
+    loadUser: builder.query({
+      query: () => ({
+        url: "profile",
+        method: "GET",
+      }),
+      async onQueryStarted(_, {queryFulfilled,dispatch}) {
+        try {
+          const result = await queryFulfilled;
+          dispatch(userLoggedIn({user:result.data.user}))
+        } catch (error) {
+          console.log(error)
+        }
+      },
+      providesTags:["User"]
+    }),
+    updateUser: builder.mutation({
+      query: (formData) => ({
+        url: "profile/update",
+        method: "PUT",
+        body: formData,
+        formData:true
+      }),
+      invalidatesTags:["User"]
+    }),
   }),
 });
 
-export const { useRegisterUserMutation, useLoginUserMutation } = authApi;
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useLoadUserQuery,
+  useUpdateUserMutation,
+  useLogoutUserMutation
+} = authApi;

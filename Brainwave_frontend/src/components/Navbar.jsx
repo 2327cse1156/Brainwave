@@ -1,5 +1,5 @@
 import { MenuIcon, School } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -24,11 +24,30 @@ import DarkMode from "../DarkMode";
 import { motion } from "framer-motion";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useLogoutUserMutation } from "@/features/api/authApi";
+import { toast } from "sonner";
+import { useSelector } from "react-redux";
+
 
 const Navbar = () => {
-  const user = true;
+  const {user} = useSelector(store=> store.auth)
   const role = "Instructor";
+  const [logoutUser,{data,isSuccess}] = useLogoutUserMutation();
+  const navigate = useNavigate();
+  const logoutHandler = async () =>{
+    await logoutUser();
+  }
+  console.log(user);
+  
+  useEffect(()=>{
+    if(isSuccess){
+    toast.success(data.message || "Logout successfully")
+    navigate("/login")
+    }
+
+
+  },[isSuccess])
 
   return (
     <nav className="h-16 bg-white dark:bg-[#0A0A0A] border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 z-10 flex justify-between items-center px-4 md:px-10">
@@ -45,7 +64,7 @@ const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                  <AvatarImage src={user?.photoUrl ||"https://github.com/shadcn.png"} alt="@shadcn" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </motion.div>
@@ -58,7 +77,7 @@ const Navbar = () => {
                 <DropdownMenuItem><Link to={"profile"}>Edit Profile</Link></DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={logoutHandler}>Log out</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Dashboard</DropdownMenuItem>
             </DropdownMenuContent>

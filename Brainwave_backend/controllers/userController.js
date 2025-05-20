@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 
 // Register Controller
 export const register = async (req, res) => {
@@ -66,6 +67,7 @@ export const register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -130,6 +132,7 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -144,27 +147,107 @@ export const login = async (req, res) => {
 // Logout Controller
 export const logout = async (req, res) => {
   try {
-    return res.status(200).cookie("token", "",{maxAge:0}.json({
-      message:"Logged Out Successfully",
-      success:true
-    }))
+    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+      message: "Logged Out Successfully",
+      success: true,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      success:false,
-      message:"Failed to logout"
-    })
+      success: false,
+      message: "Failed to logout",
+    });
+  }
+};
+// Getting user profile
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        message: "Profile not found",
+        success: false,
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          photoUrl: user.photoUrl,
+        },
+        message: "User loaded successfully",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load user",
+    });
+  }
+};
+// Updating profile
+// Updating profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { name } = req.body;
+    const profilePhoto = req.file;
+
+    console.log("uploaded file",req.file);
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    let photoUrl = user.photoUrl;
+
+    // ✅ Check if profile photo was uploaded
+    if (profilePhoto) {
+      // 🧹 Delete old photo from Cloudinary if exists
+      if (user.photoUrl) {
+        const publicId = user.photoUrl.split("/").pop().split(".")[0];
+        await deleteMediaFromCloudinary(publicId);
+      }
+
+      // ⬆ Upload new image to Cloudinary
+      const cloudResponse = await uploadMedia(profilePhoto.path);
+      if (!cloudResponse || !cloudResponse.secure_url) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to upload new profile photo",
+        });
+      }
+
+      photoUrl = cloudResponse.secure_url;
+    }
+
+    // 📝 Update user info
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name, photoUrl },
+      { new: true }
+    ).select("-password");
+
+    return res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Update failed:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+    });
   }
 };
 
-export const getUserProfile = async (req,res) => {
-  try {
-    isA
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success:false,
-      message:"Failed to load user"
-    })
-  }
-}
+
