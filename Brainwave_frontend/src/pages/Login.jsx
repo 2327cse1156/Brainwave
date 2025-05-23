@@ -13,19 +13,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useLoginUserMutation,
   useRegisterUserMutation,
+  useLoadUserQuery,
 } from "@/features/api/authApi";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { userLoggedIn } from "@/features/authSlice";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // State to control when to fetch user profile after login/register
+  const [shouldFetchUser, setShouldFetchUser] = useState(false);
+
+  const { data: userData, error: userError } = useLoadUserQuery(undefined, {
+    skip: !shouldFetchUser,
+  });
+
   const [signUpInput, setSignUpInput] = useState({
     email: "",
     password: "",
     name: "",
   });
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+
   const [
     registerUser,
     {
@@ -35,7 +49,7 @@ const Login = () => {
       isSuccess: registerIsSuccess,
     },
   ] = useRegisterUserMutation();
-  const navigate = useNavigate();
+
   const [
     loginUser,
     {
@@ -59,26 +73,30 @@ const Login = () => {
     const inputData = type === "signup" ? signUpInput : loginInput;
     const action = type === "signup" ? registerUser : loginUser;
     await action(inputData);
-    // console.log(signUpInput);
-    // console.log(loginInput);
   };
+
+  // When register or login succeeds, show toast and start fetching user profile
   useEffect(() => {
     if (registerIsSuccess && registerData) {
       toast.success(registerData.message || "Signup successfully");
+      setShouldFetchUser(true);
     }
     if (loginIsSuccess && loginData) {
-      toast.success(loginData.message || "Signup successfully");
+      toast.success(loginData.message || "Login successfully");
+      setShouldFetchUser(true);
+    }
+  }, [registerIsSuccess, registerData, loginIsSuccess, loginData]);
+
+  // When user profile data arrives, update redux store and navigate
+  useEffect(() => {
+    if (userData?.user) {
+      dispatch(userLoggedIn({ user: userData.user }));
       navigate("/");
     }
-  }, [
-    loginIsLoading,
-    registerIsLoading,
-    loginData,
-    registerData,
-    loginError,
-    registerError,
-  ]);
-
+  }, [userData, dispatch, navigate]);
+  useEffect(()=>{
+    refetch()
+  },[])
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Tabs defaultValue="signup" className="w-full max-w-md">
@@ -137,9 +155,8 @@ const Login = () => {
               >
                 {registerIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin">
-                      Please wait
-                    </Loader2>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
                   </>
                 ) : (
                   "SignUp"
@@ -188,9 +205,8 @@ const Login = () => {
               >
                 {loginIsLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin">
-                      Please wait
-                    </Loader2>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Please wait
                   </>
                 ) : (
                   "Login"

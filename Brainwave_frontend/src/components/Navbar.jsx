@@ -29,25 +29,22 @@ import { useLogoutUserMutation } from "@/features/api/authApi";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 
-
 const Navbar = () => {
-  const {user} = useSelector(store=> store.auth)
+  const { user } = useSelector((store) => store.auth);
   const role = "Instructor";
-  const [logoutUser,{data,isSuccess}] = useLogoutUserMutation();
+  const [logoutUser, { data, isSuccess }] = useLogoutUserMutation();
   const navigate = useNavigate();
-  const logoutHandler = async () =>{
+  const logoutHandler = async () => {
     await logoutUser();
-  }
+  };
   console.log(user);
-  
-  useEffect(()=>{
-    if(isSuccess){
-    toast.success(data.message || "Logout successfully")
-    navigate("/login")
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data.message || "Logout successfully");
+      navigate("/login");
     }
-
-
-  },[isSuccess])
+  }, [isSuccess]);
 
   return (
     <nav className="h-16 bg-white dark:bg-[#0A0A0A] border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 z-10 flex justify-between items-center px-4 md:px-10">
@@ -62,9 +59,15 @@ const Navbar = () => {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src={user?.photoUrl ||"https://github.com/shadcn.png"} alt="@shadcn" />
+                  <AvatarImage
+                    src={user?.photoUrl || "https://github.com/shadcn.png"}
+                    alt="@shadcn"
+                  />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
               </motion.div>
@@ -73,19 +76,30 @@ const Navbar = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem><Link to={"my-learning"}>My Learning</Link></DropdownMenuItem>
-                <DropdownMenuItem><Link to={"profile"}>Edit Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to={"my-learning"}>My Learning</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to={"profile"}>Edit Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logoutHandler}>
+                  Log out
+                </DropdownMenuItem>
               </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logoutHandler}>Log out</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Dashboard</DropdownMenuItem>
+              {user.role === "Instructor" && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Dashboard</DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline">Login</Button>
-            <Button>SignUp</Button>
+            <Button onClick={() => navigate("/login")} variant="outline">
+              Login
+            </Button>
+            <Button onClick={() => navigate("/login")}>SignUp</Button>
           </div>
         )}
       </div>
@@ -105,19 +119,43 @@ const Navbar = () => {
               <MenuIcon />
             </Button>
           </SheetTrigger>
-          <SheetContent aria-describedby="mobile-menu-description" className="p-4">
+          <SheetContent
+            aria-describedby="mobile-menu-description"
+            className="p-4"
+          >
             <SheetHeader>
               <SheetTitle>E-Learning</SheetTitle>
-              <DialogDescription id="mobile-menu-description" className="sr-only">
+              <DialogDescription
+                id="mobile-menu-description"
+                className="sr-only"
+              >
                 Mobile navigation menu with account options.
               </DialogDescription>
               {/* <DarkMode /> */}
             </SheetHeader>
             <Separator className="my-2" />
             <nav className="flex flex-col gap-2">
-              <span tabIndex={0} role="button" className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">My Learning</span>
-              <span tabIndex={0} role="button" className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">Edit Profile</span>
-              <span tabIndex={0} role="button" className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">Log Out</span>
+              <span
+                tabIndex={0}
+                role="button"
+                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              >
+                My Learning
+              </span>
+              <span
+                tabIndex={0}
+                role="button"
+                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              >
+                Edit Profile
+              </span>
+              <span
+                tabIndex={0}
+                role="button"
+                className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+              >
+                Log Out
+              </span>
             </nav>
             {role === "Instructor" && (
               <SheetFooter className="mt-4">
