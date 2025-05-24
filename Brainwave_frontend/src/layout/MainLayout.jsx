@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import { Sidebar } from 'lucide-react'
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 

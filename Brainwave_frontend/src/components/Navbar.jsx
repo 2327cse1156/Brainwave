@@ -47,7 +47,7 @@ const Navbar = () => {
   }, [isSuccess]);
 
   return (
-    <nav className="h-16 bg-white dark:bg-[#0A0A0A] border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 z-10 flex justify-between items-center px-4 md:px-10">
+    <nav className="h-16 bg-white dark:bg-[#0A0A0A] border-b dark:border-b-gray-800 border-b-gray-200 fixed top-0 left-0 right-0 z-30 flex justify-between items-center px-4 md:px-10">
       {/* Desktop */}
       <div className="flex items-center gap-2">
         <School size={30} className="text-primary" />

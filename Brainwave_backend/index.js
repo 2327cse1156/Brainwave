@@ -4,6 +4,7 @@ import connectDB from "./database/db.js";
 import userRoute from "./routes/userRoute.js";
 import cors from "cors"
 import cookieParser from "cookie-parser";
+import courseRoute from "./routes/courseRoute.js"
 dotenv.config({});
 
 connectDB();
@@ -18,13 +19,7 @@ app.use(cors({
     credentials:true
 }))
 app.use("/api/v1/user", userRoute);
-app.get("/home", (_, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Hello i am from backend",
-  });
-});
-
+app.use("/api/v1/course",courseRoute);
 app.listen(PORT, () => {
   console.log(`Server is listening at port http://localhost:${PORT}`);
 });

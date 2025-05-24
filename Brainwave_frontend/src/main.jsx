@@ -18,7 +18,6 @@ createRoot(document.getElementById("root")).render(
       <Custom>
         <App />
       </Custom>
-
       <Toaster />
     </Provider>
   </StrictMode>

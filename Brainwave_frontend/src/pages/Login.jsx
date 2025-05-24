@@ -26,9 +26,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // State to control when to fetch user profile after login/register
   const [shouldFetchUser, setShouldFetchUser] = useState(false);
-
   const { data: userData, error: userError } = useLoadUserQuery(undefined, {
     skip: !shouldFetchUser,
   });
@@ -38,7 +36,10 @@ const Login = () => {
     password: "",
     name: "",
   });
-  const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+  const [loginInput, setLoginInput] = useState({
+    email: "",
+    password: "",
+  });
 
   const [
     registerUser,
@@ -63,91 +64,93 @@ const Login = () => {
   const changeInputHandler = (e, type) => {
     const { name, value } = e.target;
     if (type === "signup") {
-      setSignUpInput({ ...signUpInput, [name]: value });
+      setSignUpInput((prev) => ({ ...prev, [name]: value }));
     } else {
-      setLoginInput({ ...loginInput, [name]: value });
+      setLoginInput((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleRegistration = async (type) => {
     const inputData = type === "signup" ? signUpInput : loginInput;
     const action = type === "signup" ? registerUser : loginUser;
-    await action(inputData);
+    try {
+      await action(inputData).unwrap();
+    } catch (err) {
+      toast.error(err?.data?.message || "Something went wrong");
+    }
   };
 
-  // When register or login succeeds, show toast and start fetching user profile
   useEffect(() => {
     if (registerIsSuccess && registerData) {
-      toast.success(registerData.message || "Signup successfully");
+      toast.success(registerData.message || "Signup successful");
       setShouldFetchUser(true);
     }
     if (loginIsSuccess && loginData) {
-      toast.success(loginData.message || "Login successfully");
+      toast.success(loginData.message || "Login successful");
       setShouldFetchUser(true);
     }
   }, [registerIsSuccess, registerData, loginIsSuccess, loginData]);
 
-  // When user profile data arrives, update redux store and navigate
   useEffect(() => {
     if (userData?.user) {
       dispatch(userLoggedIn({ user: userData.user }));
       navigate("/");
     }
   }, [userData, dispatch, navigate]);
-  useEffect(()=>{
-    refetch()
-  },[])
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Tabs defaultValue="signup" className="w-full max-w-md">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="signup">SignUp</TabsTrigger>
+          <TabsTrigger value="signup">Sign Up</TabsTrigger>
           <TabsTrigger value="login">Login</TabsTrigger>
         </TabsList>
+
+        {/* Sign Up Form */}
         <TabsContent value="signup">
           <Card className="p-4 md:p-6">
             <CardHeader>
-              <CardTitle>SignUp</CardTitle>
+              <CardTitle>Sign Up</CardTitle>
               <CardDescription>
-                Create a new account and click signup when you're done.
+                Create an account by filling the fields below.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
-                  type="text"
                   name="name"
+                  type="text"
                   value={signUpInput.name}
-                  placeholder="Ansh"
                   onChange={(e) => changeInputHandler(e, "signup")}
-                  required={true}
+                  placeholder="Ansh"
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                  type="email"
                   name="email"
+                  type="email"
                   value={signUpInput.email}
-                  required={true}
-                  placeholder="abc@gmail.com"
                   onChange={(e) => changeInputHandler(e, "signup")}
+                  placeholder="abc@gmail.com"
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
-                  type="password"
                   name="password"
+                  type="password"
                   value={signUpInput.password}
-                  placeholder="A1a2298398479"
-                  required={true}
                   onChange={(e) => changeInputHandler(e, "signup")}
+                  placeholder="••••••••"
+                  required
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter>
               <Button
                 className="w-full"
                 disabled={registerIsLoading}
@@ -156,48 +159,50 @@ const Login = () => {
                 {registerIsLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
+                    Signing Up...
                   </>
                 ) : (
-                  "SignUp"
+                  "Sign Up"
                 )}
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
+
+        {/* Login Form */}
         <TabsContent value="login">
           <Card className="p-4 md:p-6">
             <CardHeader>
               <CardTitle>Login</CardTitle>
               <CardDescription>
-                Welcome! Please log in to access your account
+                Welcome back! Log in to continue.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                  type="email"
                   name="email"
+                  type="email"
                   value={loginInput.email}
-                  required={true}
-                  placeholder="abc@gmail.com"
                   onChange={(e) => changeInputHandler(e, "login")}
+                  placeholder="abc@gmail.com"
+                  required
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
-                  type="password"
                   name="password"
+                  type="password"
                   value={loginInput.password}
-                  placeholder="A1a2298398479"
-                  required={true}
                   onChange={(e) => changeInputHandler(e, "login")}
+                  placeholder="••••••••"
+                  required
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter>
               <Button
                 className="w-full"
                 disabled={loginIsLoading}
@@ -206,7 +211,7 @@ const Login = () => {
                 {loginIsLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
+                    Logging In...
                   </>
                 ) : (
                   "Login"
